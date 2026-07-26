@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const skills = [
   { label: 'Languages', items: ['Python', 'JavaScript', 'TypeScript', 'SQL', 'HTML', 'CSS'] },
@@ -79,6 +79,156 @@ function MoonIcon({ className }: { className?: string }) {
     <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
       <path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11Z" />
     </svg>
+  )
+}
+
+function TerminalIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className} aria-hidden="true">
+      <rect x="2.5" y="4" width="19" height="16" rx="2" />
+      <path d="M6 9.5 10 12l-4 2.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12.5 15h5.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function CloseIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className} aria-hidden="true">
+      <path d="M6 6l12 12M18 6 6 18" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+type TerminalLine = { command: string; output: string[] }
+
+const TERMINAL_COMMANDS = ['help', 'about', 'skills', 'projects', 'contact', 'whoami', 'sudo', 'clear']
+
+function runCommand(raw: string): string[] {
+  const command = raw.trim().toLowerCase()
+  switch (command) {
+    case 'help':
+      return [
+        'Available commands:',
+        '  about      – who I am',
+        '  skills     – what I work with',
+        '  projects   – what I have built',
+        '  contact    – how to reach me',
+        '  whoami     – tl;dr',
+        '  clear      – clear the screen',
+      ]
+    case 'about':
+      return [
+        'Computer Science graduate and full stack developer.',
+        'Builds with React, TypeScript, and Python.',
+        'Comfortable across frontend, backend, REST APIs, and databases.',
+      ]
+    case 'skills':
+      return skills.map((group) => `${group.label}: ${group.items.join(', ')}`)
+    case 'projects':
+      return ['ColdCraft — cold email automation platform.', `Stack: ${projectTech.join(', ')}`]
+    case 'contact':
+      return [`Email: ${links.email}`, `GitHub: ${links.github}`, `LinkedIn: ${links.linkedin}`]
+    case 'whoami':
+      return ['Kella Charan Teja — frontend-leaning full stack developer.']
+    case 'sudo':
+    case 'sudo make coffee':
+      return ["Nice try. I don't have root on this one. ☕"]
+    case '':
+      return []
+    default:
+      return [`command not found: ${command}`, "Type 'help' to see what's available."]
+  }
+}
+
+function Terminal() {
+  const [open, setOpen] = useState(false)
+  const [history, setHistory] = useState<TerminalLine[]>([
+    { command: '', output: ["Type 'help' to get started."] },
+  ])
+  const [input, setInput] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (open) inputRef.current?.focus()
+  }, [open])
+
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+  }, [history])
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const command = input.trim()
+    if (command.toLowerCase() === 'clear') {
+      setHistory([])
+    } else {
+      setHistory((h) => [...h, { command, output: runCommand(command) }])
+    }
+    setInput('')
+  }
+
+  return (
+    <>
+      {open && (
+        <div className="fixed bottom-24 right-6 z-10 flex h-96 w-80 max-w-[calc(100vw-3rem)] flex-col overflow-hidden rounded-lg border border-slate-700 bg-slate-950 text-sm shadow-xl">
+          <div className="flex items-center justify-between border-b border-slate-800 px-3 py-2">
+            <span className="font-mono text-xs text-slate-400">charan@portfolio: ~</span>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label="Close terminal"
+              className="text-slate-500 transition-colors hover:text-white"
+            >
+              <CloseIcon className="h-4 w-4" />
+            </button>
+          </div>
+          <div ref={scrollRef} className="flex-1 space-y-2 overflow-y-auto px-3 py-3 font-mono text-slate-300">
+            {history.map((line, i) => (
+              <div key={i}>
+                {line.command !== '' || i > 0 ? (
+                  <div className="text-emerald-400">
+                    <span className="text-accent">➜</span> {line.command}
+                  </div>
+                ) : null}
+                {line.output.map((out, j) => (
+                  <div key={j} className="whitespace-pre-wrap text-slate-400">
+                    {out}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+          <form onSubmit={submit} className="flex items-center gap-2 border-t border-slate-800 px-3 py-2">
+            <span className="text-accent">➜</span>
+            <input
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              list="terminal-commands"
+              autoComplete="off"
+              spellCheck={false}
+              className="flex-1 bg-transparent font-mono text-slate-100 outline-none placeholder:text-slate-600"
+              placeholder="type a command…"
+            />
+            <datalist id="terminal-commands">
+              {TERMINAL_COMMANDS.map((c) => (
+                <option key={c} value={c} />
+              ))}
+            </datalist>
+          </form>
+        </div>
+      )}
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-label="Toggle terminal"
+        className="fixed bottom-6 right-6 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-accent text-white shadow-lg transition-all duration-200 hover:scale-105 active:scale-95"
+      >
+        {open ? <CloseIcon className="h-5 w-5" /> : <TerminalIcon className="h-5 w-5" />}
+      </button>
+    </>
   )
 }
 
@@ -295,6 +445,8 @@ function App() {
           .
         </footer>
       </div>
+
+      <Terminal />
     </div>
   )
 }
