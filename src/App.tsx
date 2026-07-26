@@ -1,3 +1,5 @@
+import { useEffect } from 'react'
+
 const skills = [
   { label: 'Languages', items: ['Python', 'JavaScript', 'TypeScript', 'SQL', 'HTML', 'CSS'] },
   { label: 'Frontend', items: ['React.js', 'Next.js', 'Tailwind CSS', 'Zustand', 'TanStack Router', 'TanStack Query'] },
@@ -44,6 +46,16 @@ function MailIcon({ className }: { className?: string }) {
 }
 
 function App() {
+  useEffect(() => {
+    console.log(
+      '%cHey, curious developer 👋',
+      'font-size: 16px; font-weight: 600; color: #2563eb;',
+    )
+    console.log(
+      "Since you're here — I'm Charan, and this site is React + TypeScript + Tailwind. Let's connect: k.charanteja22@gmail.com",
+    )
+  }, [])
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-white text-slate-800">
       <div
@@ -54,7 +66,7 @@ function App() {
       <div className="relative mx-auto max-w-2xl px-6 py-16 sm:py-24">
         <header className="flex flex-col gap-5">
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-semibold text-white">
+            <div className="flex h-12 w-12 shrink-0 cursor-default select-none items-center justify-center rounded-full bg-accent text-sm font-semibold text-white transition-transform duration-300 hover:-rotate-6 hover:scale-110">
               KT
             </div>
             <div>
@@ -64,6 +76,13 @@ function App() {
               <p className="text-slate-600">Frontend-leaning full stack developer</p>
             </div>
           </div>
+          <span className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+            </span>
+            Open to opportunities
+          </span>
           <nav className="flex gap-5 text-sm text-slate-600">
             <a
               href={links.github}
