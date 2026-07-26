@@ -14,6 +14,7 @@ const links = {
   github: 'https://github.com/cherry1414',
   linkedin: 'https://linkedin.com/in/kellacharanteja',
   email: 'k.charanteja22@gmail.com',
+  resume: '/resume.pdf',
   project: {
     github: '', // e.g. 'https://github.com/cherry1414/coldcraft'
     demo: '', // e.g. 'https://coldcraft.vercel.app'
@@ -88,6 +89,15 @@ function TerminalIcon({ className }: { className?: string }) {
       <rect x="2.5" y="4" width="19" height="16" rx="2" />
       <path d="M6 9.5 10 12l-4 2.5" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M12.5 15h5.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function DownloadIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className} aria-hidden="true">
+      <path d="M12 3.5v11.5m0 0 4-4m-4 4-4-4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M4.5 16.5v2a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
@@ -232,6 +242,33 @@ function Terminal() {
   )
 }
 
+function useReveal<T extends HTMLElement>() {
+  const ref = useRef<T>(null)
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.15 },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  const className = `transition-all duration-700 ease-out motion-reduce:transition-none motion-reduce:opacity-100 motion-reduce:translate-y-0 ${
+    visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+  }`
+
+  return { ref, className }
+}
+
 type Theme = 'light' | 'dark'
 
 function getInitialTheme(): Theme {
@@ -243,6 +280,9 @@ function getInitialTheme(): Theme {
 function App() {
   const [theme, setTheme] = useState<Theme>(getInitialTheme)
   const [copied, setCopied] = useState(false)
+  const aboutReveal = useReveal<HTMLElement>()
+  const skillsReveal = useReveal<HTMLElement>()
+  const projectsReveal = useReveal<HTMLElement>()
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
@@ -301,6 +341,14 @@ function App() {
             </span>
             Open to opportunities
           </span>
+          <a
+            href={links.resume}
+            download
+            className="inline-flex w-fit items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0"
+          >
+            <DownloadIcon className="h-4 w-4" />
+            Download Resume
+          </a>
           <nav className="flex flex-wrap items-center gap-5 text-sm text-slate-600 dark:text-slate-400">
             <a
               href={links.github}
@@ -338,7 +386,7 @@ function App() {
           </nav>
         </header>
 
-        <section className="mt-16">
+        <section ref={aboutReveal.ref} className={`mt-16 ${aboutReveal.className}`}>
           <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
             About
           </h2>
@@ -350,7 +398,7 @@ function App() {
           </p>
         </section>
 
-        <section className="mt-16">
+        <section ref={skillsReveal.ref} className={`mt-16 ${skillsReveal.className}`}>
           <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
             Skills
           </h2>
@@ -366,7 +414,7 @@ function App() {
           </div>
         </section>
 
-        <section className="mt-16">
+        <section ref={projectsReveal.ref} className={`mt-16 ${projectsReveal.className}`}>
           <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
             Projects
           </h2>
